@@ -26,7 +26,45 @@
         "SearchTerm": "",
         "Results": []
     };
-    
+
+    // assigning searchterm
+    result['SearchTerm'] = searchTerm
+
+    // tracks if search term has been found
+    let searchTermFound = false;
+
+    // for loop to filter through the Content array to see if Text array has searchTerm string
+    scannedTextObj[0].Content.forEach((obj) => {
+        // if searchTerm is found push the ISBN, Page, and Line into the results array 
+        if (obj.Text.includes(searchTerm)) {
+            result['Results'].push({"ISBN": scannedTextObj[0].ISBN, "Page": obj.Page, "Line": obj.Line});
+            searchTermFound = true;
+        }
+    });
+
+    if (!searchTermFound) {
+        // loops through to check if last word has hyphen and if so find the next word in array and see if it matches searchTerm
+        scannedTextObj[0].Content.forEach((obj, i) => {
+            // gets last word of Text
+            lastWord = obj.Text.split(" ")[obj.Text.split(" ").length - 1]
+
+            // if lastWord has hyphen continue
+            if (lastWord.includes('-')) {
+                firstHalf = lastWord.slice(0, -1) // extracts hyphen from last word
+                next = scannedTextObj[0].Content[i + 1].Text // gets next Text in array
+                firstWord = next.split(" ") // split next Text by " "
+                secondHalf = firstWord[0] // get first word of the next array
+                word = firstHalf + secondHalf // then combine firstHalf and secondHalf
+
+                // checks if word matches searchTerm
+                if (word == searchTerm) {
+                    // if it matches push the ISBN, Page, and Line into the results array 
+                    result['Results'].push({"ISBN": scannedTextObj[0].ISBN, "Page": obj.Page, "Line": obj.Line});
+                }
+            }
+        });
+    }
+
     return result; 
 }
 
@@ -67,6 +105,79 @@ const twentyLeaguesOut = {
     ]
 }
 
+
+//////// * my output objects * ////////
+
+// positive test cases
+const test3 = {
+    "SearchTerm": "momentum",
+    "Results": [
+        {
+            "ISBN": "9780000528531",
+            "Page": 31,
+            "Line": 8
+        }
+    ]
+}
+
+const test4 = {
+    "SearchTerm": "and",
+    "Results": [
+        {
+            "ISBN": "9780000528531",
+            "Page": 31,
+            "Line": 9
+        },
+        {
+            "ISBN": "9780000528531",
+            "Page": 31,
+            "Line": 10
+        }
+    ]
+}
+
+// negative test case
+const test5 = {
+    "SearchTerm": "or",
+    "Results": [
+    ]
+}
+
+// case-sensitive test case
+const test6 = {
+    "SearchTerm": "The",
+    "Results": [
+        {
+            "ISBN": "9780000528531",
+            "Page": 31,
+            "Line": 8
+        }
+    ]
+}
+
+// edge test cases (?)
+const test7 = {
+    "SearchTerm": "Canadian's",
+    "Results": [
+        {
+            "ISBN": "9780000528531",
+            "Page": 31,
+            "Line": 9
+        }
+    ]
+}
+
+const test8 = {
+    "SearchTerm": "darkness",
+    "Results": [
+        {
+            "ISBN": "9780000528531",
+            "Page": 31,
+            "Line": 8
+        }
+    ]
+}
+
 /*
  _   _ _   _ ___ _____   _____ _____ ____ _____ ____  
 | | | | \ | |_ _|_   _| |_   _| ____/ ___|_   _/ ___| 
@@ -101,4 +212,60 @@ if (test2result.Results.length == 1) {
     console.log("FAIL: Test 2");
     console.log("Expected:", twentyLeaguesOut.Results.length);
     console.log("Received:", test2result.Results.length);
+}
+
+//////// * my unit tests * /////////
+
+const test3result = findSearchTermInBooks("momentum", twentyLeaguesIn);
+if (JSON.stringify(test3) === JSON.stringify(test3result)) {
+    console.log("PASS: Test 3");
+} else {
+    console.log("FAIL: Test 3");
+    console.log("Expected:", test3);
+    console.log("Received:", test3result);
+}
+
+const test4result = findSearchTermInBooks("and", twentyLeaguesIn);
+if (JSON.stringify(test4) === JSON.stringify(test4result)) {
+    console.log("PASS: Test 4");
+} else {
+    console.log("FAIL: Test 4");
+    console.log("Expected:", test4);
+    console.log("Received:", test4result);
+}
+
+const test5result = findSearchTermInBooks("or", twentyLeaguesIn);
+if (JSON.stringify(test5) === JSON.stringify(test5result)) {
+    console.log("PASS: Test 5");
+} else {
+    console.log("FAIL: Test 5");
+    console.log("Expected:", test5);
+    console.log("Received:", test5result);
+}
+
+const test6result = findSearchTermInBooks("The", twentyLeaguesIn);
+if (JSON.stringify(test6) === JSON.stringify(test6result)) {
+    console.log("PASS: Test 6");
+} else {
+    console.log("FAIL: Test 6");
+    console.log("Expected:", test6);
+    console.log("Received:", test6result);
+}
+
+const test7result = findSearchTermInBooks("Canadian's", twentyLeaguesIn);
+if (JSON.stringify(test7) === JSON.stringify(test7result)) {
+    console.log("PASS: Test 7");
+} else {
+    console.log("FAIL: Test 7");
+    console.log("Expected:", test7);
+    console.log("Received:", test7result);
+}
+
+const test8result = findSearchTermInBooks("darkness", twentyLeaguesIn);
+if (JSON.stringify(test8) === JSON.stringify(test8result)) {
+    console.log("PASS: Test 8");
+} else {
+    console.log("FAIL: Test 8");
+    console.log("Expected:", test8);
+    console.log("Received:", test8result);
 }
